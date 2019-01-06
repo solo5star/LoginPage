@@ -9,6 +9,9 @@
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 </head>
 <style type="text/css">
+
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+
 html,
 body {
 	height: 100%;
@@ -92,11 +95,35 @@ h1, h2, h3, h4, h5, h6 {
 	z-index: 2;
 }
 
-.passwd-display {
-	position: relative;
-	top: 0px;
-	left: 0px;
+.email {
+	letter-spacing: 1px;
+	font-family: monospace;
+}
+
+.passwd-background {
+	position: absolute !important;
 	z-index: 1;
+	background-color: rgba(0, 0, 0, 0) !important;
+	text-shadow: 0px 0px 0px transparent; /* change [input font] by this*/
+	-webkit-text-fill-color: transparent;
+	letter-spacing: 1px;
+	font-family: monospace;
+}
+
+.passwd-foreground {
+	position: absolute !important;
+	letter-spacing: 1px;
+	font-family: monospace;
+}
+
+.passwd-background::selection {
+	background-color: orange;
+}
+
+.alt {
+	cursor: pointer;
+	color: #9e9e9e;
+	text-decoration: underline;
 }
 </style>
 <body>
@@ -105,40 +132,73 @@ h1, h2, h3, h4, h5, h6 {
 
 		<div class="form-group">
 			<label for="input_email">Email</label>
-			<input type="email" id="input_email" class="form-control" placeholder="Email address" required autofocus>
+			<input type="email" id="input_email" class="form-control email" placeholder="Email address" required autofocus>
 		</div>
 
 		<div class="form-group">
 			<label for="input_password" class="text-left">Password</label>
-			<input type="text" id="input_password" class="form-control" placeholder="Password" required>
+			<div style="position: relative">
+				<input id="input_password" class="form-control passwd-background" required>
+				<input class="form-control passwd-foreground" placeholder="Password">
+			</div>
+			<input style="visibility: hidden; z-index: -1" class="form-control">
 		</div>
 
-		<button class="btn btn-lg btn-primary btn-block" type="submit">로그인</button>
+		<div>
+			<small class="alt" onclick="changeAlt(origin)">Origin</small>
+			<small class="alt" onclick="changeAlt(alt1)">Alt1</small>
+			<small class="alt" onclick="changeAlt(alt2)">Alt2</small>
+		</div>
+		<button class="btn btn-lg btn-primary btn-block" type="submit" onclick="alert('Your password : ' + $('#input_password').val())">로그인</button>
 	</div>
 </body>
 <script type="text/javascript">
-// var passwd = ""
-// var input_cached = ""
-// $("#input_password").keyup(function(e){
-// 	if(input_cached.length === this.value.length) return; // pressed key is not a character
 
-// 	if(input_cached.length < this.value){
-// 		passwd += this.value.substring(this.value.length - 1, this.value.length)
-// 	}else if(input_cached.length < this.value){
-// 		passwd = passwd.substring(0, passwd.length - 1)
-// 	}
-// 	e.preventDefault()
+var alt
 
-// 	console.log(passwd, this.value)
-// })
+$("#input_password").on("keypress keyup keydown", function(e){
+	setTimeout(function(){
+		$(".passwd-foreground").val(alt($(this).val()))
+	}.bind(this), 0) // This will execute the code in the next message loop, after the value has been updated
+})
 
-// $("#input_password").keyup(function(e){
-// 	switch(e.keyCode){
-// 		case 46: // delete key
-// 			passwd = passwd.substring(0, passwd.length - 1)
-// 	}
+function changeAlt(_alt){
+	alt = _alt
+	$(".passwd-foreground").val(alt($("#input_password").val()))
+}
 
-// 	console.log(passwd, this.value)
-// })
+function origin(input){
+	var result = ""
+	for(var i = 0; i < input.length; i++)
+		result += "*"
+
+	return result
+}
+
+function alt1(input){
+	var result = ""
+	for(var i = 0; i < input.length; i++){
+		switch(Math.floor(i / 3) % 3){
+			case 0: result += "*"; break;
+			case 1: result += "#"; break;
+			case 2: result += "$"; break;
+		}
+	}
+	return result
+}
+
+function alt2(input){
+	var result = ""
+	for(var i = 0; i < input.length; i++){
+		switch(Math.floor(i / 3) % 2){
+			case 0: result += "-"; break;
+			case 1: result += "="; break;
+		}
+	}
+	return result
+}
+
+alt = origin
+
 </script>
 </html>
