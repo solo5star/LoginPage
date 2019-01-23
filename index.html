@@ -84,6 +84,7 @@ h1, h2, h3, h4, h5, h6 {
 	margin: 0 auto;
 	font-weight: 400;
 }
+
 .form-signin .form-control {
 	position: relative;
 	box-sizing: border-box;
@@ -91,6 +92,7 @@ h1, h2, h3, h4, h5, h6 {
 	padding: 10px;
 	font-size: 16px;
 }
+
 .form-signin .form-control:focus {
 	z-index: 2;
 }
@@ -100,24 +102,9 @@ h1, h2, h3, h4, h5, h6 {
 	font-family: monospace;
 }
 
-.passwd-background {
-	position: absolute !important;
-	z-index: 1;
-	background-color: rgba(0, 0, 0, 0) !important;
-	text-shadow: 0px 0px 0px transparent; /* change [input font] by this*/
-	-webkit-text-fill-color: transparent;
+.passwd {
 	letter-spacing: 1px;
 	font-family: monospace;
-}
-
-.passwd-foreground {
-	position: absolute !important;
-	letter-spacing: 1px;
-	font-family: monospace;
-}
-
-.passwd-background::selection {
-	background-color: orange;
 }
 
 .alt {
@@ -137,11 +124,7 @@ h1, h2, h3, h4, h5, h6 {
 
 		<div class="form-group">
 			<label for="input_password" class="text-left">Password</label>
-			<div style="position: relative">
-				<input id="input_password" class="form-control passwd-background" required>
-				<input class="form-control passwd-foreground" placeholder="Password">
-			</div>
-			<input style="visibility: hidden; z-index: -1" class="form-control">
+			<input id="input_password" class="form-control passwd" placeholder="Password" required>
 		</div>
 
 		<div>
@@ -149,22 +132,58 @@ h1, h2, h3, h4, h5, h6 {
 			<small class="alt" onclick="changeAlt(alt1)">Alt1</small>
 			<small class="alt" onclick="changeAlt(alt2)">Alt2</small>
 		</div>
-		<button class="btn btn-lg btn-primary btn-block" type="submit" onclick="alert('Your password : ' + $('#input_password').val())">로그인</button>
+		<button id="submit" class="btn btn-lg btn-primary btn-block" type="submit">로그인</button>
 	</div>
 </body>
 <script type="text/javascript">
 
+var passwd = ""
 var alt
 
-$("#input_password").on("keypress keyup keydown", function(e){
-	setTimeout(function(){
-		$(".passwd-foreground").val(alt($(this).val()))
-	}.bind(this), 0) // This will execute the code in the next message loop, after the value has been updated
+$("#submit").on("click", function(e){
+	if(passwd.length < 12){
+		alert("12자 이상 입력해주십시오")
+	}else{
+		alert("Your password : " + passwd)
+	}
+})
+
+$("#input_password").on("keypress", function(e){
+	passwd += e.key
+	$("#input_password").val(alt(passwd))
+
+	e.preventDefault()
+})
+
+$("#input_password").on("keydown", function(e){
+	switch(e.keyCode){
+		case 8: // BACKSPACE
+			passwd = passwd.substr(0, Math.max(0, passwd.length - 1))
+			$("#input_password").val(alt(passwd))
+			break;
+		case 13: // ENTER
+			$("#submit").click()
+			break;
+
+		case 35: // END
+		case 36: // HOME
+		case 37: // LEFT
+		case 38: // UP
+		case 39: // RIGHT
+		case 40: // DOWN
+			// NOT IMPLEMENTED !!
+			break;
+
+		default:
+			return;
+	}
+
+	e.preventDefault()
 })
 
 function changeAlt(_alt){
 	alt = _alt
-	$(".passwd-foreground").val(alt($("#input_password").val()))
+	$("#input_password").val(alt(passwd))
 }
 
 function origin(input){
@@ -178,7 +197,9 @@ function origin(input){
 function alt1(input){
 	var result = ""
 	for(var i = 0; i < input.length; i++){
-		switch(Math.floor(i / 3) % 3){
+		if(i > 0 && i % 3 === 0) result += " "
+
+		switch(i % 3){
 			case 0: result += "*"; break;
 			case 1: result += "#"; break;
 			case 2: result += "$"; break;
@@ -190,9 +211,12 @@ function alt1(input){
 function alt2(input){
 	var result = ""
 	for(var i = 0; i < input.length; i++){
-		switch(Math.floor(i / 3) % 2){
-			case 0: result += "-"; break;
-			case 1: result += "="; break;
+		if(i > 0 && i % 3 === 0) result += " "
+
+		switch(i % 3){
+			case 0: result += "*"; break;
+			case 1: result += "!"; break;
+			case 2: result += "?"; break;
 		}
 	}
 	return result
