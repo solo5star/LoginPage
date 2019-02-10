@@ -148,14 +148,15 @@ $("#submit").on("click", function(e){
 	}
 })
 
-$("#input_password").on("keypress", function(e){
-	passwd += e.key
-	$("#input_password").val(alt(passwd))
-
+$("#input_password").on("beforeinput", function(e){
+	var key = e.originalEvent.data
+	if(!key) return
+	passwd += key	
 	e.preventDefault()
-})
-
-$("#input_password").on("keydown", function(e){
+}).on("input", function(e){
+	$("#input_password").val(alt(passwd))
+	e.preventDefault()
+}).on("keydown", function(e){
 	switch(e.keyCode){
 		case 8: // BACKSPACE
 			passwd = passwd.substr(0, Math.max(0, passwd.length - 1))
